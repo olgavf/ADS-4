@@ -1,68 +1,73 @@
-#include <iostream>
-using namespace std;
-
 #include <cassert>
+ 
 
-template<typename N>
+template<typename T>
 class TPQueue
 {
+  // Сюда помещается описание структуры "Очередь с приоритетами"
 private:
-    N *arr;          // массив с данными
+    T* arr;          // массив с данными
     int size;        // максимальное количество элементов в очереди (размер массива)
-    int begin;       // начало очереди
-    int end;         // конец очереди
-    int countt;       // счетчик элементов
+    int begin,       // начало очереди
+        end;         // конец очереди
+    int count;       // счетчик элементов
 public:
-    TPQueue(int =100);          // конструктор по умолчанию
+    TPQueue(int = 100);          // конструктор по умолчанию
     ~TPQueue();                 // деструктор
 
-    void push(const N &); // добавить элемент в очередь
-    N pop();              // удалить элемент из очереди
-    N get() const;        // прочитать первый элемент
+    void push(const T&); // добавить элемент в очередь
+    T pop();              // удалить элемент из очереди
+    T get() const;        // прочитать первый элемент
     bool isEmpty() const;      // пустая ли очередь?
     bool isFull() const;       // заполнен ли массив?
 };
 
+
 // конструктор по умолчанию
-template<typename N>
-TPQueue<N>::TPQueue(int sizeQueue) :
-    size(sizeQueue), 
-    begin(0), end(0), countt(0)
+template<typename T>
+TPQueue<T>::TPQueue(int sizeQueue) :
+    size(sizeQueue),
+    begin(0), end(0), count(0)
 {
     // дополнительный элемент поможет нам различать конец и начало очереди
-    arr = new N[size + 1];
+    arr = new T[size + 1];
 }
 
 // деструктор класса Queue
-template<typename N>
-TPQueue<N>::~TPQueue()
+template<typename T>
+TPQueue<T>::~TPQueue()
 {
-    delete [] arr;
+    delete[] arr;
 }
 
 
 // функция добавления элемента в очередь
-template<typename N>
-void TPQueue<N>::push(const N & item)
+template<typename T>
+void TPQueue<T>::push(const T& item)
 {
     // проверяем, ести ли свободное место в очереди
-    assert( count < size );
+    assert(count < size);
 
-    arr[end] = item;
-
-    for (int i = end; i > 0; i--)
+    if (isEmpty() == true)
+        arr[end] = item;
+    else if (item.prior <= arr[end].prior)
     {
-        if (arr[i].prior > arr[i-1].prior)
-        {
-            N tmp = arr[i-1];
-            arr[i-1] = arr[i];
-            arr[i] = tmp;
-        }
+        arr[++end] = item;
     }
-
-
-    countt++;
-    end++;
+    else
+    {
+        int i = end;
+        while (arr[i].prior < item.prior)
+        {
+            arr[i + 1] = arr[i];
+            arr[i] = item;
+            if (i == begin)
+                break;
+            i--;
+        }
+        end++;
+    }
+    count++;
 
     // проверка кругового заполнения очереди
     if (end > size)
@@ -70,14 +75,14 @@ void TPQueue<N>::push(const N & item)
 }
 
 // функция удаления элемента из очереди
-template<typename N>
-N TPQueue<N>::pop()
+template<typename T>
+T TPQueue<T>::pop()
 {
     // проверяем, есть ли в очереди элементы
-    assert( countt > 0 );
+    assert(count > 0);
 
-    N item = arr[begin++];
-    countt--;
+    T item = arr[begin++];
+    count--;
 
     // проверка кругового заполнения очереди
     if (begin > size)
@@ -87,30 +92,33 @@ N TPQueue<N>::pop()
 }
 
 // функция чтения элемента на первой позиции
-template<typename N>
-N TPQueue<N>::get() const 
+template<typename T>
+T TPQueue<T>::get() const
 {
     // проверяем, есть ли в очереди элементы
-    assert( countt > 0 );
+    assert(count > 0);
     return arr[begin];
 }
 
 // функция проверки очереди на пустоту
-template<typename N>
-bool TPQueue<N>::isEmpty() const
+template<typename T>
+bool TPQueue<T>::isEmpty() const
 {
-  return countt==0;
+    return count == 0;
 }
 
 // функция проверки очереди на заполненность
-template<typename N>
-bool TPQueue<N>::isFull() const
+template<typename T>
+bool TPQueue<T>::isFull() const
 {
-  return countt==size;
+    return count == size;
 }
 
 struct SYM
 {
 	char ch;
-	int prior;
+	int  prior;
+}; 
+    char ch;
+    int  prior;
 };
